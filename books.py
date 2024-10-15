@@ -1,3 +1,5 @@
+import re
+
 import chardet
 import mysql.connector
 import requests
@@ -19,8 +21,12 @@ def get_all_books():
     db_connection = mysql.connector.connect(**db_config)
     cursor = db_connection.cursor()
 
+    # 清空表数据
+    cursor.execute("TRUNCATE TABLE books;")
+    db_connection.commit()
+
     base_url = 'http://bang.dangdang.com/books/fivestars/01.00.00.00.00.00-all-0-0-1-{}'  # URL 模板
-    total_pages = 20
+    total_pages = 10
 
     for page in tqdm(range(1, total_pages + 1), desc="Fetching books"):
         url = base_url.format(page)  # 更新URL
@@ -33,6 +39,8 @@ def get_all_books():
             # 获取排名
             rank_tag = book.find('div', class_='list_num')
             rank = rank_tag.text.strip() if rank_tag else ""
+            # 清理 rank，只保留数字字符
+            rank = re.sub(r'\D', '', rank)  # \D 匹配所有非数字字符并替换为空字符串
 
             # 获取标题
             title_tag = book.find('div', class_='name')
