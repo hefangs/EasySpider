@@ -1,53 +1,81 @@
 import os
+import random
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 from bs4 import BeautifulSoup
+from tqdm import tqdm
 
 
-def get_page_urls():
-    urls = []
-    for i in range(0, 1):  # 这里可以修改范围以获取更多页面
-        url = 'https://com.okmzt.net/photo/{}'.format(i)
+def fetch_all_page_urls():
+    page_urls = []
+    for i in range(0, 3):
+        page_url = 'https://com.okmzt.net/photo/{}'.format(i)
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
         }
 
-        res = requests.get(url, headers=headers)
+        res = requests.get(page_url, headers=headers)
         soup = BeautifulSoup(res.text, 'html.parser')
 
         lis = soup.find(class_='g-list').find_all('li')
-
         for item in lis:
-            url = item.find('a').get('href')
-            urls.append(url)
-    print(urls)
-    return urls
+            item_url = item.find('a').get('href')
+            page_urls.append(item_url)
+    print(page_urls, len(page_urls))
+    return page_urls
 
 
-def download_images(urls):
-    for url in urls:
-        res = requests.get(url)
-        soup = BeautifulSoup(res.text, 'html.parser')
+def download_images(image_page_url):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+    }
+    res = requests.get(image_page_url, headers=headers)
+    soup = BeautifulSoup(res.text, 'html.parser')
 
-        # 假设图片在页面中使用 <img> 标签，且需要的图片地址在 'src' 属性中
-        img_tag = soup.find('img')
-        if img_tag and 'src' in img_tag.attrs:
-            img_url = img_tag['src']  # 获取图片 URL
+    # Set the directory to save images
+    img_dir = "img"
+    os.makedirs(img_dir, exist_ok=True)
 
-            # 下载图片
-            img_res = requests.get(img_url)
-            if img_res.status_code == 200:
-                # 从 URL 中提取文件名
-                img_name = os.path.basename(img_url)
-                with open(img_name, 'wb') as img_file:
-                    img_file.write(img_res.content)
-                print(f"下载成功: {img_name}")
-            else:
-                print(f"图片下载失败: {img_url}")
+    img_tags = soup.find_all('img', {'referrerpolicy': 'origin'})
+    for img in img_tags:
+        img_url = img.get('src')
+        # print(img_url)
+
+        # 确保 img_url 不是 None
+        if img_url is not None:
+            try:
+                img_data = requests.get(img_url, headers=headers).content
+
+                # 获取基础文件名和扩展名
+                base_name, ext = os.path.splitext(img_url.split('/')[-1])
+
+                # 生成一个 6 位随机数
+                random_number = random.randint(100000, 999999)
+
+                # 构建目标文件名，格式为 'base_name_randomNumber.ext'
+                img_name = f"{base_name}_{random_number}{ext}"
+
+                # 保存图片
+                with open(os.path.join(img_dir, img_name), 'wb') as f:
+                    f.write(img_data)
+
+                return f"Downloaded {img_name}"
+            except Exception as e:
+                return f"Failed to download {img_url}: {str(e)}"
         else:
-            print(f"未找到图片: {url}")
+            return "Skipping image with no src attribute"
 
 
 if __name__ == '__main__':
-    urls = get_page_urls()  # 获取页面链接
-    download_images(urls)  # 下载图片
+    urls = fetch_all_page_urls()
+
+    # Set up thread pool
+    max_threads = 4  # Adjust based on CPU and bandwidth
+    with ThreadPoolExecutor(max_workers=max_threads) as executor:
+        # Submit download tasks to the executor
+        futures = [executor.submit(download_images, url) for url in urls]
+
+        # Use tqdm to show the progress
+        for future in tqdm(as_completed(futures), total=len(futures), desc="Downloading images", unit="page"):
+            future.result()  # This will raise any exceptions caught during download
