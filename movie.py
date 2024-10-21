@@ -24,7 +24,7 @@ def fetch_movies(page, cursor):
             title_tags = title_section.find_all('span', class_='title')
             main_title = title_tags[0].text.strip() if title_tags else ""
             other_titles = title_section.find('span', class_='other').text.strip() if title_section.find('span',
-                                                                                                         'other') else ""
+                                                                                                        'other') else ""
             title = f"{main_title} {other_titles}"
         else:
             title = ""
