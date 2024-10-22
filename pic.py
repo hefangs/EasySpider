@@ -9,8 +9,8 @@ from tqdm import tqdm
 
 def fetch_all_page_urls():
     page_urls = []
-    for i in range(0, 3):
-        page_url = 'https://com.okmzt.net/photo/{}'.format(i)
+    for i in range(0, 10):
+        page_url = 'https://com.okmzt.net/photo/page/{}'.format(i)
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
         }
