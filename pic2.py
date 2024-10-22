@@ -28,7 +28,7 @@ def fetch_all_page_urls():
 
 def download_images(image_page_url):
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
     }
     res = requests.get(image_page_url, headers=headers)
     soup = BeautifulSoup(res.text, 'html.parser')
