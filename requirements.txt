@@ -1,0 +1,10 @@
+requests
+beautifulsoup4
+chardet
+mysql-connector-python
+tqdm
+pyecharts
+jieba
+selenium
+snapshot-selenium
+python-dotenv
