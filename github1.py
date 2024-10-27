@@ -119,7 +119,7 @@ def get_top_followed_users(thread_count=2):
         'per_page': 10,  # 每页返回10个结果
     }
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
         'Authorization': f'token {token}'  # 使用格式化字符串插入令牌
     }
 
