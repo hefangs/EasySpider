@@ -95,7 +95,7 @@ def fetch_repo_data(url, headers, params):
         total_repos = response.json().get('items', [])
         repo_datas = [
             (repo['id'], repo['name'], repo['stargazers_count'],
-             repo['forks_count'], repo['language'], repo['html_url'])
+            repo['forks_count'], repo['language'], repo['html_url'])
             for repo in total_repos
         ]
         return repo_datas
