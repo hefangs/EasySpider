@@ -61,7 +61,7 @@ def fetch_books(page):
     return book_data
 
 
-def batch_insert(cursor, book_data, batch_size=50):
+def batch_insert(cursor, book_data, batch_size=100):
     """
     Inserts book data into the database in batches.
     """
@@ -110,11 +110,12 @@ def main():
         all_book_data.extend(book_data)
 
     # Remove duplicate entries
-    unique_books = list({tuple(book) for book in all_book_data})
-    print(f"Total unique books fetched: {len(unique_books)}")
+    # unique_books = list({tuple(book) for book in all_book_data})
+    # unique_books = list(dict.fromkeys(all_book_data))
+    # print(f"Total unique books fetched: {len(unique_books)}")
 
     # Insert data in batches
-    total_inserted = batch_insert(cursor, unique_books)
+    total_inserted = batch_insert(cursor, all_book_data)
     print(f"Total records inserted into the database: {total_inserted}")
 
     # Commit and close the connection
