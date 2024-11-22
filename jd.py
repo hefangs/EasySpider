@@ -76,11 +76,13 @@ class Database:
 
 
 def fetch_comments_page(product_id, page, headers):
-    comment_url = f'https://club.jd.com/comment/productPageComments.action?callback=fetchJSON_comment98&productId={product_id}&score=0&sortType=5&page={page}&pageSize=10&isShadowSku=0&fold=1'
+    comment_url = f'https://club.jd.com/comment/productPageComments.action?callback=fetchJSON_comment98&productId={
+        product_id}&score=0&sortType=5&page={page}&pageSize=10&isShadowSku=0&fold=1'
     try:
         response = requests.get(comment_url, headers=headers)
         response.raise_for_status()
-        comment_json = response.text.replace('fetchJSON_comment98(', '').replace(');', '')
+        comment_json = response.text.replace(
+            'fetchJSON_comment98(', '').replace(');', '')
         comment_data = json.loads(comment_json)
         return comment_data['comments']
     except (requests.RequestException, json.JSONDecodeError) as e:
@@ -105,7 +107,8 @@ def get_comments_multithread(product_url):
     all_comments = []
 
     with ThreadPoolExecutor(max_workers=thread_count) as executor:
-        futures = {executor.submit(fetch_comments_page, product_id, page, headers): page for page in range(max_pages)}
+        futures = {executor.submit(
+            fetch_comments_page, product_id, page, headers): page for page in range(max_pages)}
         for future in tqdm(as_completed(futures), total=len(futures), desc="爬取评论"):
             page_comments = future.result()
             if page_comments:
@@ -125,7 +128,6 @@ def get_comments_multithread(product_url):
                 ])
 
     print(f'共爬取到 {len(all_comments)} 条评论')
-
     batch_size = 200
     for i in range(0, len(all_comments), batch_size):
         database.insert_comments(all_comments[i:i + batch_size])
@@ -164,7 +166,8 @@ def generate_bar_chart(data, title, filename):
     filepath = os.path.join(output_dir, filename)
     temp_html_path = "temp.html"  # 临时 HTML 文件路径
     bar.render(temp_html_path)  # 先渲染为临时 HTML
-    make_snapshot(snapshot, temp_html_path, filepath)  # 使用 snapshot 将 HTML 转换为图片
+    # 使用 snapshot 将 HTML 转换为图片
+    make_snapshot(snapshot, temp_html_path, filepath)
 
     # 删除临时 HTML 文件
     if os.path.exists(temp_html_path):
@@ -186,8 +189,10 @@ def generate_word_cloud(texts, filename):
 
     # 创建词云
     wordcloud = WordCloud()
-    wordcloud.add("", [list(z) for z in zip(words, counts)], word_size_range=[20, 100])
-    wordcloud.set_global_opts(title_opts=opts.TitleOpts(title="Comments WordCloud"))
+    wordcloud.add("", [list(z)
+                  for z in zip(words, counts)], word_size_range=[20, 100])
+    wordcloud.set_global_opts(
+        title_opts=opts.TitleOpts(title="Comments WordCloud"))
 
     # 检查并创建 data 目录
     output_dir = "data"
@@ -198,7 +203,8 @@ def generate_word_cloud(texts, filename):
     filepath = os.path.join(output_dir, filename)
     temp_html_path = "render.html"  # 临时 HTML 文件路径
     wordcloud.render(temp_html_path)  # 渲染为临时 HTML
-    make_snapshot(snapshot, temp_html_path, filepath)  # 使用 snapshot 将 HTML 转换为图片
+    # 使用 snapshot 将 HTML 转换为图片
+    make_snapshot(snapshot, temp_html_path, filepath)
 
     # 删除临时 HTML 文件
     if os.path.exists(temp_html_path):
@@ -219,7 +225,8 @@ if __name__ == '__main__':
 
     # 生成 product_color 的柱状图并保存为图片
     product_colors = db.fetch_column_data("product_color")
-    generate_bar_chart(product_colors, "Product Colors", "product_colors_bar.png")
+    generate_bar_chart(product_colors, "Product Colors",
+                       "product_colors_bar.png")
 
     # 生成 product_size 的柱状图并保存为图片
     product_size = db.fetch_column_data("product_size")
